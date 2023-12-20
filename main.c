@@ -22,24 +22,21 @@ static int food_nr;
 static int festival_nr;
 
 typedef struct Board {
-	char boardName[50];
+	char BoardName[50];
 	int Nodetype;
 	int Credit;
 	int Energy;
-} board ;
+} board ; //struct for Board
 
 typedef struct Food {
 	char foodName[50];
 	int foodenergy;
-} food;
+} food;//struct for Food
 
 typedef struct festival {
-    char data[100]; // 노드의 데이터
-    struct Node* next; // 다음 노드를 가리키는 포인터
-} festival;
+    char data[100]; // data of node
+} festival;//struct for Festival
 
-// 전역 변수로 리스트의 헤드 포인터를 선언
-festival* list_database = NULL;
 
 //function prototypes
 int isGraduated(void); //check if any player is graduated
@@ -101,20 +98,16 @@ int main(int argc, const char * argv[]) {
     int type;
     int credit;
     int energy;
-    int i;
-    char line[100];
+    int initEnergy;
+    int i;//use for tempoaray value
+    char line[100];//array for each line
     
     board_nr = 0;
     food_nr = 0;
     festival_nr = 0;
-    int player_nr = 0;
+    int player_nr = 0; //when game starts, it have a value.
     
-    festival *festival1 ;
-    board *board1;
-    
-    board *borad1 = (board*)malloc(sizeof(board) * 16);  // 예제 데이터가 16개이므로 크기를 조절
-    
-    srand(time(NULL));
+	srand(time(NULL));
     
     //1. import parameters ---------------------------------------------------------------------------------
     //1-1. boardConfig 
@@ -124,12 +117,18 @@ int main(int argc, const char * argv[]) {
         getchar();
         return -1;
     }
-    
     printf("Reading board component......\n");
+    board *board_ = (board*)malloc(sizeof(board) * 50); //dynamically allocated array ... and '50' means MAX_line_nr 
+    if (board_ == NULL) {//if dynamically allocated array is empty, file-close and return 1 for ERROR message
+        fprintf(stderr, "Unable to allocate memory.\n");
+        fclose(fp);
+        return 1;
+    }
     while (fgets(line, sizeof(line), fp) != NULL)//read a node parameter set
     {
-        int smmdb_addTail(line);//store the parameter set
-        board_nr++;
+        int smmdb_addTail(line);//store the parameter set 
+        sscanf(line, "%s %d %d %d", board_[board_nr].BoardName, &board_[board_nr].Nodetype, &board_[board_nr].Credit, &board_[board_nr].Energy); // each data store at each variable in the struct
+        board_nr++; //indicator for board number 
     }
     fclose(fp);
     printf("Total number of board nodes : %i\n", board_nr);
@@ -140,52 +139,56 @@ int main(int argc, const char * argv[]) {
         printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FOODFILEPATH);
         return -1;
     }
-    
-    printf("\n\nReading food card component......\n");
-    while (fgets(line, sizeof(line), fp) != NULL) //read a food parameter set
+    printf("\nReading food card component......\n");
+    food *food_ = (food*)malloc(sizeof(food) * 50); //dynamically allocated array ... and '50' means MAX_line_nr 
+    if (food_ == NULL) {//if dynamically allocated array is empty, file-close and return 1 for ERROR message
+        fprintf(stderr, "Unable to allocate memory.\n");
+        fclose(fp);
+        return 1;
+    }
+	while (fgets(line, sizeof(line), fp) != NULL) //read a food parameter set
     {
         int smmdb_addTail(line);     //store the parameter set
-        food_nr++;
+        sscanf(line, "%s %d", food_[food_nr].foodName, &food_[food_nr].foodenergy);// each data store at each variable in the struct
+        food_nr++;//indicator for food number 
     }
     fclose(fp);
     printf("Total number of food cards : %i\n", food_nr);
-
-    
+	
     //3. festival card config 
     if ((fp = fopen(FESTFILEPATH,"r")) == NULL)
     {
         printf("[ERROR] failed to open %s. This file should be in the same directory of SMMarble.exe.\n", FESTFILEPATH);
         return -1;
     }
-    
-    printf("\n\nReading festival card component......\n");
-    while (fgets(line, sizeof(line), fp) != NULL) //read a festival card string
+    printf("\nReading festival card component......\n");
+    festival *festival_ = (festival*)malloc(sizeof(festival) * 50); //dynamically allocated array ... and '50' means MAX_line_nr 
+    if (festival_ == NULL) {//if dynamically allocated array is empty, file-close and return 1 for ERROR message
+        fprintf(stderr, "Unable to allocate memory.\n");
+        fclose(fp);
+        return 1;
+    }
+	while (fgets(line, sizeof(line), fp) != NULL) //read a festival card string
     {
     	int smmdb_addTail(line);
-    	//sscanf(line, "%s", festival1.data);
-        festival_nr++;
+    	sscanf(line, "%s", festival_[festival_nr].data);// each data store at each variable in the struct
+        festival_nr++;//indicator for festival number 
     }
     fclose(fp);
-    printf("Total number of festival cards : %i\n", festival_nr);
-    
-
-    
+    printf("Total number of festival cards : %i\n", festival_nr); 
     
     //2. Player configuration ---------------------------------------------------------------------------------
-    printf("How Many Player? : "); //input player number to player_nr
+    for(i=0;i<board_nr;i++){
+    	if(board_[i].Nodetype == 3) initEnergy = board_[i].Energy; //Home Energy become initial Engergy
+	}
+	printf("How Many Player? : "); //input player number to player_nr
     scanf("%d",&player_nr); // when a turn begins, code have to repeat according this number
     char playerName[50][50]; //max num of name character and players is each 50 .
-    for(i=0;i<player_nr;i++){
+	for(i=0;i<player_nr;i++){
     	printf("What's Your Name? : ");
 		scanf("%s", &playerName[i]); //input one's name
-		//generatePlayers(i, initEnergy); //generate a new player
 	}
-	//MUST-DO ; initEnergy from "marbleBoardConfig.txt" (home energy)
-
-
-    
-    
-    
+	
     //3. SM Marble game starts ---------------------------------------------------------------------------------
     while (0) //is anybody graduated?
     {
