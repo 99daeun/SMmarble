@@ -20,6 +20,22 @@ void smmObj_genNode(void)
     
 }
 
+typedef struct Board {
+	char boardName[50];
+	int Nodetype;
+	int credit;
+	int energy;
+} board ;
+
+typedef struct Food {
+	char foodName[50];
+	int foodenergy;
+}food;
+
+typedef struct festival {
+    char data[100]; // 노드의 데이터
+    struct Node* next; // 다음 노드를 가리키는 포인터
+} festival;
 
 
 //member retrieving
