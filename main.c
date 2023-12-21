@@ -61,13 +61,13 @@ float calcAverageGrade(int player); //calculate average grade of the player
 
 void* findGrade(int player, char *lectureName); //find the grade from the player's grade history
 
-int rolldie()
+int rolldie(int j)
 {
-    char c;
-    printf(" Press any key to roll a die ");
+    printf("Press any key to roll a die ");
     _getch(); // 키 입력 대기
-    printf("%d칸이동\n", rand()%6 + 1 );
-    return (rand()%6 + 1);
+    int ran = rand()%6 + 1;
+    printf("\n%d th player! %d칸이동\n", j+1, ran);
+    return ran;
 }
 
 void printGrades(int player)
@@ -98,14 +98,16 @@ int main(int argc, const char * argv[]) {
     int energy;
     int i,j,r,k;//use for tempoaray value
     char line[100];//array for each line
-	int score[9]; //a+, a0, a-, b+, b0, b-, c+, c0, c- 
+	char score[9] = {'A+', 'A0', 'A-', 'B+','B0','B-','C+','C0','C-'}; 
     int lec_check[50][50] = {0}; //0 means havenot take lecture, 1 means taken lecture
-    int success = 0;
+    int suc = 0;
     board_nr = 0;
     food_nr = 0;
     festival_nr = 0;
     int player_nr = 0; //when game starts, it have a value.
     player_con player_con[50];
+	int NT; 
+	
 	srand(time(NULL));
     
     //1. import parameters ---------------------------------------------------------------------------------
@@ -177,7 +179,7 @@ int main(int argc, const char * argv[]) {
     printf("Total number of festival cards : %i\n", festival_nr); 
     
     //2. Player configuration ---------------------------------------------------------------------------------
-	printf("How Many Player? : "); //input player number to player_nr
+	printf("\nHow Many Player? : "); //input player number to player_nr
     scanf("%d",&player_nr); // when a turn begins, code have to repeat according this number
     char playerName[50][50]; //max num of name character and players is each 50 .
 	for(i=0;i<player_nr;i++)
@@ -192,77 +194,91 @@ int main(int argc, const char * argv[]) {
 		player_con[i].now_energy = board_[0].Energy; 	// first line of marbleBoardConfig.txt file is always home. and all the players starts home energy.
 		player_con[i].position = 0; //start from the origin  
 	}
-	
+	printf("\n");
     //3. SM Marble game starts ---------------------------------------------------------------------------------
     for(i=0;;i++)// A-turn
 	{
 		j = i % player_nr; // repeat-continued j'th player.
+		
 		//실험실 !
 		if (player_con[j].experiment == 1)
 		{
-			player_con[j].position == 2;
-			printf("실험실에 왔습니다!");
-			if (rolldie() >= success ) player_con[j].experiment = 0; 
+			player_con[j].position == 2;//실험시간이 걸리면 위치도 실험실로 바뀜 
+			printf("%dth 플레이어  실험실에 있습니다!\n", j+1);
+			if ((rand()%6 +1) >= suc ) 
+			{
+				player_con[j].experiment = 0;
+				printf("%d th 플레이어! 탈출 성공\n",j+1);
+			} //주사위가 성공을 넘음으로써 탈출, 다음 턴부터 일반적으로 주사위를 굴리고 탈출한다. 
 			else player_con[j].now_energy -= 3;// consumption energy
 		} 
-		r = rolldie();
-		player_con[j].position += r; //position check
-		if(player_con[j].position > board_nr) player_con[j].position -= board_nr; //board_nr is max of the position num
-		r = player_con[j].position; // board node should be saved
+		
+		if(player_con[j].experiment == 0){//실험실에 있는 동안 이동하지 못한다. 
+			printf("%d th player, 누적학점 : %d 현재 에너지 : %d  ",j+1,player_con[j].acc_credit,player_con[j].now_energy);
+			if (player_con[j].experiment == 0) printf("실험중 상태 아님\n");
+			if(player_con[j].experiment == 1) printf("실험 중 ㅠ\n"); 
+			player_con[j].position = player_con[j].position + rolldie(j); //position check
+			if(player_con[j].position >= board_nr) player_con[j].position = player_con[j].position - board_nr; //board_nr is max of the position num
+			NT = board_[player_con[j].position].Nodetype;//노드타입과 현재 위치를 연관 시킨다.
+		}
 		
 		//take lecture.
-		if (r == 0)
+		if (NT == 0)
 		{
-			if (lec_check[j][r] == 0 && player_con[j].now_energy > board_[r].Energy)
+			printf("%d th player! %s 에 도착했다.",j+1,board_[player_con[j].position].BoardName);
+			if (lec_check[j][player_con[j].position] == 0 && player_con[j].now_energy > board_[player_con[j].position].Energy)
 			{
-				char c;
-    			printf(" press y to take a lecture");
-    			c = getchar();
-    			if (c == 'y')
-    			{
-    				player_con[j].now_energy -= board_[r].Energy;			
-					lec_check[j][r] = 1;
-					player_con[j].acc_credit += board_[r].Credit;
-				}
-				else
+    			char c;
+				printf("Press ENTER to take a lecture.   ");
+    			c = _getch();
+    			if (c == 13)
 				{
-					printf("you do not take a lecture.");
-				}	
+    				player_con[j].now_energy -= board_[player_con[j].position].Energy;			
+					lec_check[j][player_con[j].position] = 1;
+					player_con[j].acc_credit += board_[player_con[j].position].Credit;	
+					printf("%d th player! 당신의 현재까지 총 이수 학점은 %d 입니다.\n", j+1, player_con[j].acc_credit);
+				}
+    			else printf("you do not take a lecture.");
 			}
 			else
 			{
-			printf("you cannot take a lecture.");	
+				printf("you cannot take a lecture.\n");	
 			}
 		}
 		
 		//Eat !
-		if (r == 1){
-			player_con[j].now_energy += board_[r].Energy;
+		if (NT == 1 && player_con[j].experiment == 0){
+			printf("%d th player! %s 에 도착했다.\n",j+1,board_[player_con[j].position].BoardName);
+			player_con[j].now_energy += board_[player_con[j].position].Energy;
 		}
 		
 		//실험!
-		if (r == 4){
+		if (NT  == 4 && player_con[j].experiment == 0){
+			printf("%d th player! %s 에 도착했다.\n",j+1,board_[player_con[j].position].BoardName);
 			player_con[j].experiment = 1;
-			success = rand()%6 + 1;
-			printf("실험실에 갑니다! 성공 주사위는 %d 입니다", &success); 
+			suc = rand()%6 + 1 ;
+			printf("실험실에 갑니다! 성공 주사위는 %d 입니다\n", suc); 
 		} 
 		
 		//집 !
-		if (r == 0)
+		if (NT  == 3 && player_con[j].experiment == 0)
 		{
 			player_con[j].now_energy += board_[0].Energy;
+			printf("%d th player! %s 에 도착했다.\n",j+1,board_[player_con[j].position].BoardName);
 		} 
 		//보충 찬스 
-		if (r == 5)
+		if (NT == 5 && player_con[j].experiment == 0)
 		{
+			printf("%d th player! %s 에 도착했다.\n",j+1,board_[player_con[j].position].BoardName);
 			k = rand()%food_nr;
 			player_con[j].now_energy += food_[k].foodenergy;
-			printf("%d th player! supplement the energy with %s\n",j+1,food_[k].foodName);
+			printf("%d th player! supplement the energy with %s, and your energy is %d now \n",j+1,food_[k].foodName,player_con[j].now_energy);
 			k = 0; 
 		} 
 		//축제!
-		if (r == 6)
+		if (NT == 6 && player_con[j].experiment == 0)
 		{
+			printf("%d th player! %s 에 도착했다.\n",j+1,board_[player_con[j].position].BoardName);
 			k = rand()%festival_nr;
 			printf("%d th player! execute the mission, %s\n",j+1,festival_[k].data);
 			k = 0;
@@ -270,11 +286,22 @@ int main(int argc, const char * argv[]) {
 		
 		
 		if (player_con[j].acc_credit >= GRADUATE_CREDIT) break;
+		
 	}	
 	
 	//game-end 
 	j = i % player_nr;
-	printf("%d th 플레이어 우승! 누적 학점 : %d 최종 에너지 : %d\n",j+1, player_con[j].acc_credit, player_con[i].now_energy) ;
+	printf("\n\n%d th 플레이어 우승! 누적 학점 : %d 최종 에너지 : %d\n",j+1, player_con[j].acc_credit, player_con[j].now_energy) ;
+    //lec_check[j][player_con[j].position] 이게 1이면, 들었던 강의 
+	//게임 종료와 함께 졸업한 플레이어가 수강한 강의의 이름, 학점, 성적을 각각 출력
     
-    return 0;
+    for(r=0;r<board_nr;r++)
+	{
+    	if (lec_check[j][r] == 0)//r은 보드 위의 한 점
+		{ 
+    		printf("수강한 과목 : %s 과목 학점 : %d 성적 : %s",board_[r].BoardName, board_[r].Credit, score[rand()%9]);
+		}
+	}
+    
+	return 0;
 }
