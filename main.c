@@ -64,9 +64,8 @@ int rolldie()
 {
     char c;
     printf(" Press any key to roll a die ");
-    c = getchar();
-    fflush(stdin);
-    
+    _getch(); // 키 입력 대기
+    printf("%d", rand()%MAX_DIE + 1 );
     return (rand()%MAX_DIE + 1);
 }
 
@@ -197,6 +196,17 @@ int main(int argc, const char * argv[]) {
     for(i=0;;i++)// A-turn
 	{
 		j = i % player_nr; // repeat-continued j'th player.
+		//실험실 !
+		if (player_con[j].experiment == 1)
+		{
+			player_con[j].position == 2;
+			printf("실험실에 왔습니다!");
+			if (rolldie() >= success ) player_con[j].experiment = 0; 
+			else 
+			{
+				player_con[j].now_energy -= 3;// consumption energy
+			}
+		} 
 		r = rolldie();
 		player_con[j].position += r; //position check
 		if(player_con[j].position > board_nr) player_con[j].position -= board_nr; //board_nr is max of the position num
@@ -236,17 +246,7 @@ int main(int argc, const char * argv[]) {
 		if (r == 4){
 			player_con[j].experiment = 1;
 			success = rand()%MAX_DIE + 1;
-		} 
-		
-		//실험실 !
-		if (player_con[j].experiment == 1)
-		{
-			player_con[j].position == 2;
-			if (rolldie() >= success ) player_con[j].experiment = 0; 
-			else 
-			{
-				player_con[j].now_energy -= 3;// consumption energy
-			}
+			printf("실험실에 갑니다! 성공 주사위는 %d 입니다", &success); 
 		} 
 		
 		//집 !
@@ -259,14 +259,14 @@ int main(int argc, const char * argv[]) {
 		{
 			k = rand()%food_nr;
 			player_con[j].now_energy += food_[k].foodenergy;
-			printf("%d th player! supplement the energy with %s\n",j,food_[k].foodName);
+			printf("%d th player! supplement the energy with %s\n",j+1,food_[k].foodName);
 			k = 0; 
 		} 
 		//축제!
 		if (r == 6)
 		{
 			k = rand()%festival_nr;
-			printf("%d th player! execute the mission, %s\n",j,festival_[k].data);
+			printf("%d th player! execute the mission, %s\n",j+1,festival_[k].data);
 			k = 0;
 		}
 		
@@ -276,7 +276,7 @@ int main(int argc, const char * argv[]) {
 	
 	//game-end 
 	j = i % player_nr;
-	printf("%d th 플레이어 우승! 누적 학점 : %d 최종 에너지 : %d\n",j, player_con[j].acc_credit, player_con[i].now_energy) ;
+	printf("%d th 플레이어 우승! 누적 학점 : %d 최종 에너지 : %d\n",j+1, player_con[j].acc_credit, player_con[i].now_energy) ;
     
     return 0;
 }
