@@ -216,7 +216,7 @@ int main(int argc, const char * argv[]) {
 		if(player_con[j].experiment == 0){//실험실에 있는 동안 이동하지 못한다. 
 			printf("%d th player, 누적학점 : %d 현재 에너지 : %d  ",j+1,player_con[j].acc_credit,player_con[j].now_energy);
 			if (player_con[j].experiment == 0) printf("실험중 상태 아님\n");
-			if(player_con[j].experiment == 1) printf("실험 중 ㅠ\n"); 
+			if (player_con[j].experiment == 1) printf("실험 중 ㅠ\n"); 
 			player_con[j].position = player_con[j].position + rolldie(j); //position check
 			if(player_con[j].position >= board_nr) player_con[j].position = player_con[j].position - board_nr; //board_nr is max of the position num
 			NT = board_[player_con[j].position].Nodetype;//노드타입과 현재 위치를 연관 시킨다.
@@ -295,11 +295,11 @@ int main(int argc, const char * argv[]) {
     //lec_check[j][player_con[j].position] 이게 1이면, 들었던 강의 
 	//게임 종료와 함께 졸업한 플레이어가 수강한 강의의 이름, 학점, 성적을 각각 출력
     
-    for(r=0;r<board_nr;r++)
+    for(r=0;r<50;r++)
 	{
-    	if (lec_check[j][r] == 0)//r은 보드 위의 한 점
+    	if (lec_check[j][r] == 1)//r은 보드 위의 한 점
 		{ 
-    		printf("수강한 과목 : %s 과목 학점 : %d 성적 : %s",board_[r].BoardName, board_[r].Credit, score[rand()%9]);
+    		printf("\n수강한 과목 : %s \n과목 학점 : %d \n성적 : %s\n",board_[r].BoardName, board_[r].Credit, score[rand()%9]);
 		}
 	}
     
