@@ -7,6 +7,7 @@
 
 #include <time.h>
 #include <string.h>
+#include <stdlib.h>
 #include "smm_object.h"
 #include "smm_database.h"
 #include "smm_common.h"
@@ -65,8 +66,8 @@ int rolldie()
     char c;
     printf(" Press any key to roll a die ");
     _getch(); // 키 입력 대기
-    printf("%d", rand()%MAX_DIE + 1 );
-    return (rand()%MAX_DIE + 1);
+    printf("%d칸이동\n", rand()%6 + 1 );
+    return (rand()%6 + 1);
 }
 
 void printGrades(int player)
@@ -202,10 +203,7 @@ int main(int argc, const char * argv[]) {
 			player_con[j].position == 2;
 			printf("실험실에 왔습니다!");
 			if (rolldie() >= success ) player_con[j].experiment = 0; 
-			else 
-			{
-				player_con[j].now_energy -= 3;// consumption energy
-			}
+			else player_con[j].now_energy -= 3;// consumption energy
 		} 
 		r = rolldie();
 		player_con[j].position += r; //position check
@@ -245,7 +243,7 @@ int main(int argc, const char * argv[]) {
 		//실험!
 		if (r == 4){
 			player_con[j].experiment = 1;
-			success = rand()%MAX_DIE + 1;
+			success = rand()%6 + 1;
 			printf("실험실에 갑니다! 성공 주사위는 %d 입니다", &success); 
 		} 
 		
